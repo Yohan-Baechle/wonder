@@ -23,7 +23,7 @@ class SecurityController extends AbstractController
     }
 
     #[Route('/signup', name: 'signup')]
-    public function signup(UserAuthenticatorInterface $userAuthenticator, Request $request, EntityManagerInterface $em, UserPasswordHasherInterface $passwordHasher)
+    public function signup(Request $request, EntityManagerInterface $em, UserPasswordHasherInterface $passwordHasher, UserAuthenticatorInterface $authenticator, LoginFormAuthenticator $loginForm)
     {
         $user = new User();
         $userForm = $this->createForm(UserType::class, $user);
@@ -34,8 +34,11 @@ class SecurityController extends AbstractController
             $em->persist($user);
             $em->flush();
             $this->addFlash('success', 'Bienvenue sur Wonder !');
-
-            return $userAuthenticator->authenticateUser($user, $this->authenticator, $request);
+            return $authenticator->authenticateUser(
+                $user,
+                $loginForm,
+                $request
+            );
         }
         return $this->render('security/signup.html.twig', ['form' => $userForm->createView()]);
     }
