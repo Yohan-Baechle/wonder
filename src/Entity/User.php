@@ -8,6 +8,7 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\Table(name: '`user`')]
@@ -20,6 +21,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?int $id = null;
 
     #[ORM\Column(length: 180)]
+    #[Assert\Email(message: 'Veuillez rentrer un email valide.')]
+    #[Assert\NotBlank(message: 'Veuillez renseigner votre email.')]
     private ?string $email = null;
 
     /**
@@ -32,12 +35,19 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      * @var string The hashed password
      */
     #[ORM\Column]
+    #[Assert\Length(min: 6, minMessage: 'Le mot de passe doit faire au moins 6 caractères.')]
+    #[Assert\NotBlank(message: 'Veuillez renseigner un mot de passe.')]
     private ?string $password = null;
 
+    #[Assert\Length(min: 6, minMessage: 'Le mot de passe doit faire au moins 6 caractères.')]
+    private ?string $newPassword = null;
+
     #[ORM\Column(length: 255)]
+    #[Assert\NotBlank(message: 'Veuillez renseigner votre prénom.')]
     private ?string $firstname = null;
 
     #[ORM\Column(length: 255)]
+    #[Assert\NotBlank(message: 'Veuillez renseigner votre nom.')]
     private ?string $lastname = null;
 
     /**
@@ -53,6 +63,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private Collection $comments;
 
     #[ORM\Column(length: 255)]
+    #[Assert\Url(message: 'Veuillez renseigner une url.')]
+    #[Assert\NotBlank(message: 'Veuillez renseigner une image de profil.')]
     private ?string $picture = null;
 
     public function __construct()
@@ -123,6 +135,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setPassword(string $password): static
     {
         $this->password = $password;
+
+        return $this;
+    }
+
+    public function getNewPassword(): ?string
+    {
+        return $this->newPassword;
+    }
+
+    public function setNewPassword(string $newPassword): self
+    {
+        $this->newPassword = $newPassword;
 
         return $this;
     }
@@ -230,5 +254,10 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->picture = $picture;
 
         return $this;
+    }
+
+    public function getFullname(): ?string
+    {
+        return $this->firstname . ' ' . $this->lastname;
     }
 }
