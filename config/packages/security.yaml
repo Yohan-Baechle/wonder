@@ -21,9 +21,12 @@ security:
                 check_path: login
                 enable_csrf: true
             remember_me:
-                secret: '%kernel.secret'
+                secret: '%kernel.secret%'
             logout:
                 path: logout
+            login_throttling:
+                max_attempts: 3
+                interval: '10 minutes'
 
             # activate different ways to authenticate
             # https://symfony.com/doc/current/security.html#the-firewall
