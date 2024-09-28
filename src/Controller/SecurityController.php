@@ -23,7 +23,7 @@ class SecurityController extends AbstractController
     }
 
     #[Route('/signup', name: 'signup')]
-    public function signup(Request $request, EntityManagerInterface $em, UserPasswordHasherInterface $passwordHasher, UserAuthenticatorInterface $authenticator, LoginFormAuthenticator $loginForm)
+    public function signup(UserAuthenticatorInterface $userAuthenticator, Request $request, EntityManagerInterface $em, UserPasswordHasherInterface $passwordHasher)
     {
         $user = new User();
         $userForm = $this->createForm(UserType::class, $user);
@@ -34,31 +34,22 @@ class SecurityController extends AbstractController
             $em->persist($user);
             $em->flush();
             $this->addFlash('success', 'Bienvenue sur Wonder !');
-            return $authenticator->authenticateUser(
-                $user,
-                $loginForm,
-                $request
-            );
+
+            return $userAuthenticator->authenticateUser($user, $this->authenticator, $request);
         }
         return $this->render('security/signup.html.twig', ['form' => $userForm->createView()]);
     }
 
 
-    #[Route('/login', name: 'login')]
-    public function index(AuthenticationUtils $authenticationUtils): Response
+    #[Route("/login", name: "login")]
+    public function login(AuthenticationUtils $authenticationUtils): Response
     {
-
         if ($this->getUser()) {
             return $this->redirectToRoute('home');
         }
-
         $error = $authenticationUtils->getLastAuthenticationError();
         $lastUsername = $authenticationUtils->getLastUsername();
-
-        return $this->render('security/login.html.twig', [
-            'last_username' => $lastUsername,
-            'error' => $error,
-        ]);
+        return $this->render('security/login.html.twig', ['last_username' => $lastUsername, 'error' => $error]);
     }
 
     #[Route("/logout", name: "logout")]
